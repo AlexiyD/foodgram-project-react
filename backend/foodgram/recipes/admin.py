@@ -1,36 +1,61 @@
-from django.contrib import admin
-from . import models
+from django.contrib.admin import ModelAdmin, TabularInline, register
+from recipes.models import (IngredientRecipe, Favorite, Ingredient, Recipe,
+                            ShoppingCart, Tag)
 
 
-class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'measurement_unit')
+@register(Tag)
+class TagAdmin(ModelAdmin):
+    list_display = ('id', 'name', 'color', 'slug',)
+    search_fields = ('name', 'slug',)
+    ordering = ('color', )
+    empty_value_display = '-пусто-'
+
+
+class IngredientRecipeInLine(TabularInline):
+    model = IngredientRecipe
+
+
+@register(Ingredient)
+class IngredientAdmin(ModelAdmin):
+    list_display = ('name', 'measurement_unit',)
+    search_fields = ('^name', )
     list_filter = ('name', )
-    search_fields = ('name', )
-
-
-class TagAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'color', 'slug')
-    list_editable = ('name', 'color', 'slug')
+    inlines = (IngredientRecipeInLine, )
     empty_value_display = '-пусто-'
 
 
-class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'author', 'in_favorites')
-    list_editable = (
-        'name', 'cooking_time', 'text', 'tags',
-        'image', 'author'
-    )
-    readonly_fields = ('in_favorites',)
-    list_filter = ('name', 'author', 'tags')
+@register(IngredientRecipe)
+class IngredientRecipeAdmin(ModelAdmin):
+    list_display = ('ingredient', 'recipe', 'amount',)
+    list_filter = ('ingredient', 'recipe', 'amount')
     empty_value_display = '-пусто-'
 
- 
-class RecipeIngredientAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'recipe', 'ingredient', 'amount')
-    list_editable = ('recipe', 'ingredient', 'amount')
+
+@register(Recipe)
+class RecipeAdmin(ModelAdmin):
+    list_display = ('id', 'name', 'author', 'favorited')
+    list_filter = ('name', 'author', 'tags',)
+    search_fields = ('name', 'author', 'tags',)
+    inlines = (IngredientRecipeInLine, )
+    empty_value_display = '-пусто-'
+
+    def favorited(self, obj):
+        return Favorite.objects.filter(recipe=obj).count()
+
+    favorited.short_description = 'В избранном'
 
 
-admin.register(models.RecipeIngredient)
-admin.register(models.Recipe)
-admin.register(models.Tag)
-admin.register(models.Ingredient)
+@register(Favorite)
+class FavoriteAdmin(ModelAdmin):
+    list_display = ('id', 'user', 'recipe')
+    list_filter = ('user', 'recipe')
+    search_fields = ('user', 'recipe')
+    empty_value_display = '-пусто-'
+
+
+@register(ShoppingCart)
+class ShoppingCartAdmin(ModelAdmin):
+    list_display = ('id', 'user', 'recipe')
+    list_filter = ('user', 'recipe')
+    search_fields = ('user', 'recipe')
+    empty_value_display = '-пусто-'
