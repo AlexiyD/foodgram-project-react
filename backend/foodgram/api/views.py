@@ -1,6 +1,9 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+import xhtml2pdf.pisa as pisa
+from io import BytesIO
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from recipes.models import (IngredientRecipe, Favorite, Ingredient, Recipe,
@@ -126,9 +129,17 @@ class RecipeViewSet(ModelViewSet):
         for ingredient in ingredients:
             name, measure, amount = ingredient
             shopping_list += f'{name} ({measure}) — {amount}\n'
-        response = HttpResponse(shopping_list, content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
+        template_path = 'shopping_list.html'
+        context = {'shopping_list': shopping_list}
+        template = get_template(template_path)
+        html = template.render(context)
+        result = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+
+        response = HttpResponse(result.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
         return response
+        
 
     def _add_or_remove_recipe_from_list(self, request, pk, serializer_class, list_model):
         user = request.user
