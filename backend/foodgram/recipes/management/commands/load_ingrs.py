@@ -10,10 +10,12 @@ class Command(BaseCommand):
 
     def load_ingredients(self, file='ingredients.csv'):
         file_path = f'./data/{file}'
-        with open(file_path, newline='', encoding='utf-8') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                status, created = Ingredient.objects.update_or_create(
-                    name=row[0],
-                    measurement_unit=row[1]
-                )
+        for row in reader:
+            ingredient, created = Ingredient.objects.update_or_create(
+                name=row[0],
+                measurement_unit=row[1]
+            )
+            if created:
+                self.stdout.write(f"Created new ingredient: {ingredient}")
+            else:
+                self.stdout.write(f"Ingredient already exists: {ingredient}") 

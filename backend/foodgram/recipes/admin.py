@@ -1,22 +1,21 @@
-from django.contrib.admin import ModelAdmin, TabularInline, register
+from django.contrib import admin
 from recipes.models import (IngredientRecipe, Favorite, Ingredient, Recipe,
                             ShoppingCart, Tag)
 
 
-@register(Tag)
-class TagAdmin(ModelAdmin):
+class TagAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'color', 'slug',)
     search_fields = ('name', 'slug',)
     ordering = ('color', )
     empty_value_display = '-пусто-'
 
 
-class IngredientRecipeInLine(TabularInline):
+class IngredientRecipeInLine(admin.TabularInline):
     model = IngredientRecipe
 
 
-@register(Ingredient)
-class IngredientAdmin(ModelAdmin):
+
+class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit',)
     search_fields = ('^name', )
     list_filter = ('name', )
@@ -24,15 +23,15 @@ class IngredientAdmin(ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-@register(IngredientRecipe)
-class IngredientRecipeAdmin(ModelAdmin):
+
+class IngredientRecipeAdmin(admin.ModelAdmin):
     list_display = ('ingredient', 'recipe', 'amount',)
     list_filter = ('ingredient', 'recipe', 'amount')
     empty_value_display = '-пусто-'
 
 
-@register(Recipe)
-class RecipeAdmin(ModelAdmin):
+
+class RecipeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'author', 'favorited')
     list_filter = ('name', 'author', 'tags',)
     search_fields = ('name', 'author', 'tags',)
@@ -45,17 +44,23 @@ class RecipeAdmin(ModelAdmin):
     favorited.short_description = 'В избранном'
 
 
-@register(Favorite)
-class FavoriteAdmin(ModelAdmin):
+class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_filter = ('user', 'recipe')
     search_fields = ('user', 'recipe')
     empty_value_display = '-пусто-'
 
 
-@register(ShoppingCart)
-class ShoppingCartAdmin(ModelAdmin):
+
+class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_filter = ('user', 'recipe')
     search_fields = ('user', 'recipe')
     empty_value_display = '-пусто-'
+
+admin.site.register(Tag, TagAdmin)
+admin.site.register(Ingredient, IngredientAdmin)
+admin.site.register(IngredientRecipe, IngredientRecipeAdmin)
+admin.site.register(Recipe, RecipeAdmin)
+admin.site.register(Favorite, FavoriteAdmin)
+admin.site.register(ShoppingCart, ShoppingCartAdmin)

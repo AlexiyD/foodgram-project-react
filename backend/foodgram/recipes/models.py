@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -81,10 +82,10 @@ class Recipe(models.Model):
             MaxValueValidator(
             1000, message='время приготовления рецепта не должно быть > 1000 мин.'
         ), ],
-        verbose_name='Время приготовления в минутах',
+        verbose_name='Время приготовления рецепта',
     )
     author = ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=CASCADE,
         null=True,
         verbose_name='Автор',
@@ -126,7 +127,7 @@ class IngredientRecipe(models.Model):
         ]
         ordering = ('id',)
         verbose_name = 'Кол-во ингредиента'
-        verbose_name_plural = 'Количество ингредиента'
+        verbose_name_plural = 'Кол-во ингредиента'
 
     def __str__(self):
         return f'{self.amount} {self.ingredient}'
@@ -134,7 +135,7 @@ class IngredientRecipe(models.Model):
 
 class Favorite(models.Model):
     user = ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=CASCADE,
         verbose_name='Пользователь',
         related_name='favorites',
@@ -142,7 +143,7 @@ class Favorite(models.Model):
     recipe = ForeignKey(
         Recipe,
         on_delete=CASCADE,
-        verbose_name='Любимый Рецепт',
+        verbose_name='Избраный Рецепт',
         related_name='favorites',
     )
 
@@ -163,7 +164,7 @@ class ShoppingCart(models.Model):
         related_name='shopping_cart'
     )
     user = ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=CASCADE,
         verbose_name='Пользователь',
         related_name='shopping_cart'
