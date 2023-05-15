@@ -26,6 +26,10 @@ class BaseUserCreateSerializer(UserCreateSerializer):
 class BaseUserSerializer(UserSerializer):
     is_subscribed = SerializerMethodField()
 
+    def get_is_subscribed(self, obj):
+        user = self.context['request'].user
+        return not user.is_anonymous and Subscription.objects.filter(user=user, author=obj).exists()
+
     class Meta:
         model = User
         fields = (
@@ -36,12 +40,6 @@ class BaseUserSerializer(UserSerializer):
             'last_name',
             'is_subscribed',
         )
-
-    def get_is_subscribed(self, obj):
-        user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return Subscription.objects.filter(user=user, author=obj).exists()
 
 
 class PasswordSerializer(Serializer):
@@ -125,7 +123,10 @@ class IngredientRecipeCreateSerializer(ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ('id', 'amount',)
+        fields = (
+            'id',
+             'amount',
+        )
 
 
 class TagSerializer(ModelSerializer):

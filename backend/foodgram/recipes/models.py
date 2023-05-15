@@ -1,3 +1,5 @@
+import re
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -9,16 +11,26 @@ from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
 
 
 class Tag(models.Model):
+    def validate_name(name):
+        if not re.match(r'^[\w\s-]+$', name):
+            raise ValidationError('Тэг содержит недопустимые символы.')
+        
     name = CharField(
         verbose_name='Тэг',
         max_length=200,
         unique=True,
+        validators=[validate_name]
     )
+    def validate_color(color):
+        if not re.match(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', color):
+            raise ValidationError('Цвет должен быть в формате HEX (#XXXXXX или #XXX).')
+
     color = CharField(
         verbose_name='Цвет',
         max_length=7,
         unique=True,
         db_index=False,
+        validators=[validate_color]
     )
     slug = SlugField(
         verbose_name='Слаг tag',
@@ -30,7 +42,7 @@ class Tag(models.Model):
         ordering = ('-id',)
         verbose_name = 'Тэг'
         verbose_name_plural = 'Теги'
-
+    
     def __str__(self):
         return self.name
 
@@ -77,11 +89,14 @@ class Recipe(models.Model):
         verbose_name='Описание рецепта',
     )
     cooking_time = PositiveSmallIntegerField(
-        validators=[MinValueValidator(
-            1, message='время приготовления рецепта не должно быть < 1 мин.'),
+        validators=[
+            MinValueValidator(
+                1, message='время приготовления рецепта не должно быть < 1 мин.'
+            ),
             MaxValueValidator(
-            1000, message='время приготовления рецепта не должно быть > 1000 мин.'
-        ), ],
+                10000, message='время приготовления рецепта не должно быть > 10000 мин.'
+            )
+        ],
         verbose_name='Время приготовления рецепта',
     )
     author = ForeignKey(
@@ -118,7 +133,7 @@ class IngredientRecipe(models.Model):
         verbose_name='Ингредиент',
         related_name='Ingredient_Recipe'
     )
-    amount = models.IntegerField(verbose_name='Количество')
+    amount = models.PositiveSmallIntegerField(verbose_name='Количество')
 
     class Meta:
         constraints = [
