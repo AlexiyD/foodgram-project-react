@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from django.db import transaction
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import IngredientRecipe, Favorite, Ingredient, Recipe, Tag
 from rest_framework.serializers import (CharField, CurrentUserDefault,
@@ -7,7 +8,9 @@ from rest_framework.serializers import (CharField, CurrentUserDefault,
                                         ModelSerializer,
                                         PrimaryKeyRelatedField, Serializer,
                                         SerializerMethodField)
+from rest_framework.validators import UniqueTogetherValidator
 from users.models import Subscription, User
+from recipes.models import ShoppingCart
 
 
 class BaseUserCreateSerializer(UserCreateSerializer):
@@ -225,17 +228,23 @@ class RecipeCreateSerializer(ModelSerializer):
         )
 
     def get_ingredients(self, obj):
-        ingredients = IngredientRecipe.objects.filter(recipe=obj)
+        ingredients = obj.ingredient_recipes.all()
         return IngredientRecipeListSerializer(ingredients).data
 
+    @transaction.atomic
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
-        self._add_ingredients(recipe, ingredients_data)
+        try:
+            recipe = Recipe.objects.create(**validated_data)
+            recipe.tags.set(tags)
+            self._add_ingredients(recipe, ingredients_data)
+        except Exception as e:
+            recipe.delete()
+            raise e
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         tags_data = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
@@ -270,11 +279,21 @@ class RecipeCreateSerializer(ModelSerializer):
 
 
 class ShoppingCartSerializer(ModelSerializer):
+    user = HiddenField(CurrentUserDefault())
+    
     class Meta:
-        model = Ingredient
+        model = ShoppingCart
         fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time'
+            'user',
+            'recipe',
         )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('user', 'recipe'),
+                message='Рецепт уже находится в корзине'
+            )
+        ]
+    
+    def create(self, validated_data):
+        return ShoppingCart.objects.create(**validated_data)
