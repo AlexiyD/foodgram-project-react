@@ -14,6 +14,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.validators import ValidationError
 from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
@@ -66,17 +67,17 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
         user = self.request.user
         author = get_object_or_404(User, id=id)
         subscription = Subscription.objects.filter(user=user, author=author)
+
         if request.method == 'POST':
             if subscription.exists():
-                data = {'data': 'You cannot subscribe to yourself.'}
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+                raise ValidationError('You cannot subscribe to yourself.')
             Subscription.objects.create(user=user, author=author)
             serializer = SubscriptionSerializer(author, context={'request': request})
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
         if request.method == 'DELETE':
             if not subscription.exists():
-                data = {'data': 'You are not subscribed to this user.'}
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+                raise ValidationError('You are not subscribed to this user.')
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -150,11 +151,13 @@ class RecipeViewSet(ModelViewSet):
             if not in_list:
                 list_objects = list_model.objects.create(user=user, recipe=recipe)
                 serializer = serializer_class(list_objects.recipe)
-                return Response(data=serializer.data, status=201)
+                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+            raise ValidationError('Рецепт уже находится в списке покупок')
 
         if request.method == 'DELETE':
             if not in_list:
-                data = {'errors': 'Рецепта нет в списке'}
-                return Response(data=data, status=400)
+                raise ValidationError('Рецепта нет в списке')
+
             in_list.delete()
-            return Response(status=204)
+            return Response(status=status.HTTP_204_NO_CONTENT)
