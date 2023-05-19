@@ -31,7 +31,9 @@ class BaseUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
-        return not user.is_anonymous and Subscription.objects.filter(user=user, author=obj).exists()
+        return (not user.is_anonymous 
+                and Subscription.objects.
+                filter(user=user, author=obj).exists())
 
     class Meta:
         model = User
@@ -279,7 +281,7 @@ class RecipeCreateSerializer(ModelSerializer):
 
 
 class ShoppingCartSerializer(ModelSerializer):
-    user = HiddenField(CurrentUserDefault())
+    user = HiddenField(default=CurrentUserDefault())
     
     class Meta:
         model = ShoppingCart
