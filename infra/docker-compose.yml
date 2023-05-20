@@ -1,31 +1,40 @@
 version: '3.8'
 services:
-
-  db:
+  postgres:
     image: postgres:13.0-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./.env
+    networks:
+      - foodgram_network
 
   frontend:
-    image: alexiyd/foodgram_front:latest
+    # image: alexiyd/foodgram_front:latest
+    build: ../frontend
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
-      - db
+      - postgres
+    networks:
+      - foodgram_network
 
   backend:
-    image: alexiyd/foodgram_back:latest
+    # image: alexiyd/foodgram_back:latest
+    build: ../backend
     restart: always
     volumes:
       - static_value:/app/static/
       - media_value:/app/media
     depends_on:
+      - postgres
       - frontend
+    command: bash -c "(python manage.py makemigrations || true) && (python manage.py migrate || true) && (python manage.py load_tags || true) && (python manage.py load_ingrs || true) && gunicorn -w 2 -b 0:8000 foodgram.wsgi"
     env_file:
       - ./.env
-  
+    networks:
+      - foodgram_network
+
   nginx:
     image: nginx:1.19.3
     ports:
@@ -38,8 +47,13 @@ services:
       - media_value:/var/html/media
     depends_on:
       - backend
+    networks:
+      - foodgram_network
 
 volumes:
   postgres_data:
   static_value:
   media_value:
+
+networks:
+  foodgram_network:

@@ -70,14 +70,18 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
 
         if request.method == 'POST':
             if subscription.exists():
-                raise ValidationError('You cannot subscribe to yourself.')
+                data = {'data': 'You cannot subscribe to yourself.'}
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
             Subscription.objects.create(user=user, author=author)
             serializer = SubscriptionSerializer(author, context={'request': request})
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
             if not subscription.exists():
-                raise ValidationError('You are not subscribed to this user.')
+                data = {'data': 'You are not subscribed to this user.'}
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
