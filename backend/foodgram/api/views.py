@@ -1,4 +1,5 @@
 from django.db.models import Sum
+
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
@@ -38,7 +39,10 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = BaseUserSerializer
 
-    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated])
+    @action(methods=['POST'],
+            detail=False,
+            permission_classes=[IsAuthenticated]
+            )
     def set_password(self, request, pk=None):
         user = self.request.user
         serializer = PasswordSerializer(
@@ -50,7 +54,10 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['GET'], detail=False, permission_classes=[IsAuthenticated])
+    @action(methods=['GET'],
+            detail=False,
+            permission_classes=[IsAuthenticated]
+            )
     def subscriptions(self, request):
         user = request.user
         queryset = User.objects.filter(following__user=user)
@@ -62,20 +69,35 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(methods=['POST', 'DELETE'], detail=True, permission_classes=[IsAuthenticated])
+    @action(methods=['POST', 'DELETE'],
+            detail=True,
+            permission_classes=[IsAuthenticated]
+            )
     def subscribe(self, request, id):
         user = self.request.user
         author = get_object_or_404(User, id=id)
-        subscription = Subscription.objects.filter(user=user, author=author)
+        subscription = Subscription.objects.filter(
+            user=user,
+            author=author
+        )
 
         if request.method == 'POST':
             if subscription.exists():
                 data = {'data': 'You cannot subscribe to yourself.'}
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    data=data,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             Subscription.objects.create(user=user, author=author)
-            serializer = SubscriptionSerializer(author, context={'request': request})
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            serializer = SubscriptionSerializer(
+                author,
+                context={'request': request}
+            )
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_201_CREATED
+            )
 
         if request.method == 'DELETE':
             if not subscription.exists():
@@ -84,6 +106,7 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
 
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        return None
 
 
 class TagViewSet(ListRetrieveViewSet):
@@ -128,10 +151,9 @@ class RecipeViewSet(ModelViewSet):
                                                     Favorite
                                                     )
 
-    @action(methods=['POST',
-                      'DELETE'],
-                        detail=True,
-                        permission_classes=[IsAuthenticated]
+    @action(methods=['POST', 'DELETE'],
+            detail=True,
+            permission_classes=[IsAuthenticated]
             )
     def shopping_cart(self, request, pk=None):
         return self._add_or_remove_recipe_from_list(
@@ -141,7 +163,10 @@ class RecipeViewSet(ModelViewSet):
             ShoppingCart
         )
 
-    @action(methods=['GET'], detail=False, permission_classes=[IsAuthenticated])
+    @action(methods=['GET'],
+            detail=False,
+            permission_classes=[IsAuthenticated]
+            )
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_cart__user=request.user
@@ -159,10 +184,13 @@ class RecipeViewSet(ModelViewSet):
         result = BytesIO()
         pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
 
-        response = HttpResponse(result.getvalue(), content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
+        response = HttpResponse(result.getvalue(),
+                                content_type='application/pdf'
+                                )
+        response[
+            'Content-Disposition'
+            ] = 'attachment; filename="shopping_list.pdf"'
         return response
-
 
     def _add_or_remove_recipe_from_list(self,
                                         request,
