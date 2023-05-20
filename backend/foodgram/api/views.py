@@ -1,9 +1,8 @@
-
+import xhtml2pdf.pisa as pisa
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
-import xhtml2pdf.pisa as pisa
 from io import BytesIO
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
