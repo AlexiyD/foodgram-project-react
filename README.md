@@ -1,5 +1,5 @@
 # praktikum_new_diplom
-![example workflow](https://github.com/AlexiyD/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
+![example workflow](https://github.com/AlexiyD/foodgram-project-react/actions/workflows/yamdb_workflow.yml/badge.svg)
 # Сайт Foodgam - Продуктовый помощник
 ## Описание:
 >На этом сервисе пользователи смогут публиковать рецепты,
@@ -59,107 +59,6 @@ https://github.com/AlexiyD/foodgram-project-react.git
 * DB_HOST - адрес хоста с БД 
 * DB_PORT - порт для подключения БД
 
-
-## Примеры запросов и ответов:
-### Регистрация нового пользователя
-
-#### Пример запроса
-```URL
-POST: http://127.0.0.1:8000/api/v1/auth/signup/
-```
-```JSON
-{
-    "email": "user@example.com",
-    "username": "string"
-}
-```
-#### Пример ответа
-```JSON
-{
-    "email": "string",
-    "username": "string"
-}
-```
-### Получение JWT-токена
-#### Пример запроса
-```URL
-POST: http://127.0.0.1:8000/api/v1/auth/token/
-```
-```JSON
-{
-    "username": "string",
-    "confirmation_code": "string"
-}
-```
-#### Пример ответа
-```JSON
-{
-    "token": "string"
-}
-```
-
-### Добавление произведения
-#### Пример запроса
-```URL
-POST: http://127.0.0.1:8000/api/v1/titles/
-```
-```JSON
-{
-    "name": "string",
-    "year": 0,
-    "description": "string",
-    "genre": [
-        "string"
-    ],
-    "category": "string"
-}
-```
-#### Пример ответа
-```JSON
-{
-    "id": 0,
-    "name": "string",
-    "year": 0,
-    "rating": 0,
-    "description": "string",
-    "genre": [
-        {
-            "name": "string",
-            "slug": "string"
-        }
-    ],
-    "category": {
-        "name": "string",
-        "slug": "string"
-    }
-}
-```
-
-### Добавление нового отзыва
-#### Пример запроса
-```URL
-POST: http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/
-```
-```JSON
-{
-    "id": 0,
-    "text": "string",
-    "author": "string",
-    "score": 1,
-    "pub_date": "2019-08-24T14:15:22Z"
-}
-```
-#### Пример ответа
-```JSON
-{
-    "id": 0,
-    "text": "string",
-    "author": "string",
-    "score": 1,
-    "pub_date": "2019-08-24T14:15:22Z"
-}
-```
-* ip 158.160.27.74
-* ссылка на общую документацию http://158.160.27.74/redoc/
+* ip 158.160.11.67
 ## Автор:
 * Зубков Алексей - AlexiyD (разработчик)
