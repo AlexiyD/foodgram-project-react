@@ -10,7 +10,7 @@ services:
       - foodgram_network
 
   frontend:
-    image: alexiyd/infra-frontendt:latest
+    image: alexiyd/infra-frontend:latest
 
     volumes:
       - ../frontend/:/app/result_build/
