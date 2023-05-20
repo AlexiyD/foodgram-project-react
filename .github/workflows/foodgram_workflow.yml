@@ -42,13 +42,12 @@ jobs:
           with:
             context: ./frontend/
             push: true
-            tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_front:latest
-        - name: Push back to Docker Hub
+            tags: ${{ secrets.DOCKER_USERNAME }}/infra-frontend:latest
           uses: docker/build-push-action@v2
           with:
             context: ./backend/
             push: true
-            tags: # alexiyd/api_yamdb:vol1
+            tags: alexiyd/infra-backend:latest 
   deploy:
     runs-on: ubuntu-latest
     needs: build_and_push_to_docker_hub
