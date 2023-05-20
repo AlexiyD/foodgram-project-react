@@ -1,5 +1,5 @@
 # praktikum_new_diplom
-![example workflow](https://github.com/AlexiyD/foodgram-project-react/actions/workflows/yamdb_workflow.yml/badge.svg)
+![example workflow](https://github.com/AlexiyD/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 # Сайт Foodgam - Продуктовый помощник
 ## Описание:
 >На этом сервисе пользователи смогут публиковать рецепты,
