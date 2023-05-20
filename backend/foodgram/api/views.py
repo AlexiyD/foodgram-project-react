@@ -117,17 +117,35 @@ class RecipeViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(methods=['POST', 'DELETE'], detail=True, permission_classes=[IsAuthenticated])
+    @action(methods=['POST', 'DELETE'],
+            detail=True,
+            permission_classes=[IsAuthenticated]
+            )
     def favorite(self, request, pk=None):
-        return self._add_or_remove_recipe_from_list(request, pk, FavoriteSerializer, Favorite)
+        return self._add_or_remove_recipe_from_list(request,
+                                                    pk,
+                                                    FavoriteSerializer,
+                                                    Favorite
+                                                    )
 
-    @action(methods=['POST', 'DELETE'], detail=True, permission_classes=[IsAuthenticated])
+    @action(methods=['POST',
+                      'DELETE'],
+                        detail=True,
+                        permission_classes=[IsAuthenticated]
+            )
     def shopping_cart(self, request, pk=None):
-        return self._add_or_remove_recipe_from_list(request, pk, ShoppingCartSerializer, ShoppingCart)
+        return self._add_or_remove_recipe_from_list(
+            request,
+            pk,
+            ShoppingCartSerializer,
+            ShoppingCart
+        )
 
     @action(methods=['GET'], detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        ingredients = IngredientRecipe.objects.filter(recipe__shopping_cart__user=request.user).values_list(
+        ingredients = IngredientRecipe.objects.filter(
+            recipe__shopping_cart__user=request.user
+        ).values_list(
             'ingredient__name', 'ingredient__measurement_unit'
         ).order_by().annotate(Sum('amount'))
         shopping_list = 'Shopping list:\n'
@@ -144,17 +162,31 @@ class RecipeViewSet(ModelViewSet):
         response = HttpResponse(result.getvalue(), content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
         return response
-        
 
-    def _add_or_remove_recipe_from_list(self, request, pk, serializer_class, list_model):
+
+    def _add_or_remove_recipe_from_list(self,
+                                        request,
+                                        pk,
+                                        serializer_class,
+                                        list_model):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        in_list = list_model.objects.filter(user=user, recipe=recipe)
+        in_list = list_model.objects.filter(user=user,
+                                            recipe=recipe
+                                            )
         if request.method == 'POST':
             if not in_list:
-                list_objects = list_model.objects.create(user=user, recipe=recipe)
-                serializer = serializer_class(list_objects.recipe)
-                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+                list_objects = list_model.objects.create(
+                    user=user,
+                    recipe=recipe
+                )
+                serializer = serializer_class(
+                    list_objects.recipe
+                )
+                return Response(
+                    data=serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
             raise ValidationError('Рецепт уже находится в списке покупок')
         if request.method == 'DELETE':
             if not in_list:
@@ -162,4 +194,3 @@ class RecipeViewSet(ModelViewSet):
             in_list.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
