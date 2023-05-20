@@ -31,7 +31,7 @@ class BaseUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
-        return (not user.is_anonymous 
+        return (not user.is_anonymous
                 and Subscription.objects.
                 filter(user=user, author=obj).exists())
 
@@ -130,7 +130,7 @@ class IngredientRecipeCreateSerializer(ModelSerializer):
         model = Ingredient
         fields = (
             'id',
-             'amount',
+            'amount',
         )
 
 
@@ -166,21 +166,12 @@ class FavoriteSerializer(ModelSerializer):
         )
 
 
-class TagSerializer(ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = (
-            'id',
-            'name',
-            'color',
-            'slug',
-        )
-
-
 class RecipeListSerializer(ModelSerializer):
     tags = TagSerializer(many=True)
     author = BaseUserSerializer()
-    ingredients = IngredientRecipeListSerializer(many=True, source='ingredients')
+    ingredients = IngredientRecipeListSerializer(
+        many=True, source='ingredients'
+    )
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
 
@@ -194,7 +185,8 @@ class RecipeListSerializer(ModelSerializer):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        return Recipe.objects.filter(shopping_cart__user=user, id=obj.id).exists()
+        return Recipe.objects.filter(
+            shopping_cart__user=user, id=obj.id).exists()
 
     class Meta:
         model = Recipe
@@ -275,9 +267,10 @@ class RecipeCreateSerializer(ModelSerializer):
             'author',
         )
 
+
 class ShoppingCartSerializer(ModelSerializer):
     user = HiddenField(default=CurrentUserDefault())
-    
+
     class Meta:
         model = ShoppingCart
         fields = (
@@ -291,6 +284,7 @@ class ShoppingCartSerializer(ModelSerializer):
                 message='Рецепт уже находится в корзине'
             )
         ]
-    
+
     def create(self, validated_data):
         return ShoppingCart.objects.create(**validated_data)
+    

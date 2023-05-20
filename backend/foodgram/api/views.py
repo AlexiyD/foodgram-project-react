@@ -150,18 +150,16 @@ class RecipeViewSet(ModelViewSet):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
         in_list = list_model.objects.filter(user=user, recipe=recipe)
-
         if request.method == 'POST':
             if not in_list:
                 list_objects = list_model.objects.create(user=user, recipe=recipe)
                 serializer = serializer_class(list_objects.recipe)
                 return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
             raise ValidationError('Рецепт уже находится в списке покупок')
-
         if request.method == 'DELETE':
             if not in_list:
                 raise ValidationError('Рецепта нет в списке')
-
             in_list.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    

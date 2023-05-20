@@ -1,7 +1,6 @@
 import re
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
@@ -11,20 +10,25 @@ from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
 
 
 class Tag(models.Model):
-    def validate_name(name):
+    @staticmethod
+    def validate_name(self, name):
         if not re.match(r'^[\w\s-]+$', name):
-            raise ValidationError('Тэг содержит недопустимые символы.')
-        
+            raise ValidationError(
+                'Тэг содержит недопустимые символы.'
+    )
+
     name = CharField(
         verbose_name='Тэг',
         max_length=200,
         unique=True,
         validators=[validate_name]
     )
-    def validate_color(color):
+    @staticmethod
+    def validate_color(self, color):
         if not re.match(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', color):
-            raise ValidationError('Цвет должен быть в формате HEX (#XXXXXX или #XXX).')
-
+            raise ValidationError(
+                'Цвет должен быть в формате HEX (#XXXXXX или #XXX).'
+    )
     color = CharField(
         verbose_name='Цвет',
         max_length=7,
@@ -37,12 +41,11 @@ class Tag(models.Model):
         max_length=200,
         unique=True,
     )
-
     class Meta:
         ordering = ('-id',)
         verbose_name = 'Тэг'
         verbose_name_plural = 'Теги'
-    
+
     def __str__(self):
         return self.name
 
@@ -91,10 +94,12 @@ class Recipe(models.Model):
     cooking_time = PositiveSmallIntegerField(
         validators=[
             MinValueValidator(
-                1, message='время приготовления рецепта не должно быть < 1 мин.'
+                1,
+                message='время приготовления не должно быть < 1 мин.'
             ),
             MaxValueValidator(
-                10000, message='время приготовления рецепта не должно быть > 10000 мин.'
+                10000, 
+                message='время приготовления не должно быть > 10000 мин.'
             )
         ],
         verbose_name='Время приготовления рецепта',
@@ -140,7 +145,6 @@ class IngredientRecipe(models.Model):
         ],
         verbose_name='Количество',
     )
-
 
     class Meta:
         constraints = [

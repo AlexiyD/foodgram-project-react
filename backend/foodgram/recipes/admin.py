@@ -14,7 +14,6 @@ class IngredientRecipeInLine(admin.TabularInline):
     model = IngredientRecipe
 
 
-
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit',)
     search_fields = ('^name', )
@@ -23,12 +22,10 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-
 class IngredientRecipeAdmin(admin.ModelAdmin):
     list_display = ('ingredient', 'recipe', 'amount',)
     list_filter = ('ingredient', 'recipe', 'amount')
     empty_value_display = '-пусто-'
-
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -51,12 +48,12 @@ class FavoriteAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_filter = ('user', 'recipe')
     search_fields = ('user', 'recipe')
     empty_value_display = '-пусто-'
+
 
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
