@@ -43,6 +43,7 @@ jobs:
             context: ./frontend/
             push: true
             tags: ${{ secrets.DOCKER_USERNAME }}/infra-frontend:latest
+        - name: push_back_docker    
           uses: docker/build-push-action@v2
           with:
             context: ./backend/
