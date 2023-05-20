@@ -10,8 +10,8 @@ services:
       - foodgram_network
 
   frontend:
-    # image: alexiyd/foodgram_front:latest
-    build: ../frontend
+    image: alexiyd/infra-frontendt:latest
+
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
@@ -20,8 +20,8 @@ services:
       - foodgram_network
 
   backend:
-    # image: alexiyd/foodgram_back:latest
-    build: ../backend
+    image: alexiyd/infra-backend:latest
+    
     restart: always
     volumes:
       - static_value:/app/static/
