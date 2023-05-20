@@ -1,4 +1,5 @@
 import csv
+
 from django.core.management.base import BaseCommand
 from recipes.models import Ingredient
 
@@ -20,8 +21,8 @@ class Command(BaseCommand):
                 if created:
                     self.stdout.write(
                         f"Created new ingredient: {ingredient}"
-                        )
+                    )
                 else:
                     self.stdout.write(
                         f"Ingredient already exists: {ingredient}"
-                        )
+                    )

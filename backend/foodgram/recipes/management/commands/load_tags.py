@@ -16,6 +16,3 @@ class Command(BaseCommand):
         ]
         Tag.objects.bulk_create(Tag(**tag) for tag in tags)
         self.stdout.write(self.style.SUCCESS('All tags have been loaded!'))
-
-
-

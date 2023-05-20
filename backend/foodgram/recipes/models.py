@@ -1,4 +1,5 @@
 import re
+
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -23,12 +24,13 @@ class Tag(models.Model):
         unique=True,
         validators=[validate_name]
     )
+
     @staticmethod
     def validate_color(self, color):
         if not re.match(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', color):
             raise ValidationError(
                 'Цвет должен быть в формате HEX (#XXXXXX или #XXX).'
-    )
+            )
     color = CharField(
         verbose_name='Цвет',
         max_length=7,
@@ -41,6 +43,7 @@ class Tag(models.Model):
         max_length=200,
         unique=True,
     )
+
     class Meta:
         ordering = ('-id',)
         verbose_name = 'Тэг'
@@ -98,7 +101,7 @@ class Recipe(models.Model):
                 message='время приготовления не должно быть < 1 мин.'
             ),
             MaxValueValidator(
-                10000, 
+                10000,
                 message='время приготовления не должно быть > 10000 мин.'
             )
         ],
