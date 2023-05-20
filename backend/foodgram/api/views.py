@@ -189,7 +189,7 @@ class RecipeViewSet(ModelViewSet):
                                 )
         response[
             'Content-Disposition'
-            ] = 'attachment; filename="shopping_list.pdf"'
+        ] = 'attachment; filename="shopping_list.pdf"'
         return response
 
     def _add_or_remove_recipe_from_list(self,

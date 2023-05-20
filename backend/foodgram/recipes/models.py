@@ -16,7 +16,7 @@ class Tag(models.Model):
         if not re.match(r'^[\w\s-]+$', name):
             raise ValidationError(
                 'Тэг содержит недопустимые символы.'
-    )
+        )
 
     name = CharField(
         verbose_name='Тэг',
