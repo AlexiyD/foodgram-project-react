@@ -125,20 +125,19 @@ class IngredientRecipe(models.Model):
         to=Recipe,
         on_delete=CASCADE,
         verbose_name='Рецепт',
-        related_name='Ingredient_Recipe'
+        related_name='ingredient_recipe'
     )
     ingredient = ForeignKey(
         to=Ingredient,
         on_delete=CASCADE,
         verbose_name='Ингредиент',
-        related_name='Ingredient_Recipe'
+        related_name='ingredient_recipe'
     )
-    amount_ingredient = PositiveSmallIntegerField(
-        validators=[MinValueValidator(
-            1, message='Добавте еще'),
-            MaxValueValidator(
-            100, message='перебор'
-        ), ],
+    amount = PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(1, message='Добавте еще'),
+            MaxValueValidator(100, message='перебор'),
+        ],
         verbose_name='Количество',
     )
 

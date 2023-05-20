@@ -180,8 +180,7 @@ class TagSerializer(ModelSerializer):
 class RecipeListSerializer(ModelSerializer):
     tags = TagSerializer(many=True)
     author = BaseUserSerializer()
-    ingredients = IngredientRecipeListSerializer(many=True,
-                                                 source='amount_ingredient')
+    ingredients = IngredientRecipeListSerializer(many=True, source='ingredients')
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
 
@@ -195,8 +194,7 @@ class RecipeListSerializer(ModelSerializer):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        return Recipe.objects.filter(shopping_cart__user=user,
-                                     id=obj.id).exists()
+        return Recipe.objects.filter(shopping_cart__user=user, id=obj.id).exists()
 
     class Meta:
         model = Recipe
