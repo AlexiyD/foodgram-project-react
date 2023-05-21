@@ -12,4 +12,3 @@ def validate_color(color):
         raise ValidationError(
             'Цвет должен быть в формате HEX (#XXXXXX или #XXX).'
         )
-    
