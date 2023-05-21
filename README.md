@@ -60,5 +60,7 @@ https://github.com/AlexiyD/foodgram-project-react.git
 * DB_PORT - порт для подключения БД
 
 * ip 158.160.11.67
+* admin@admin.ru
+* admin14789
 ## Автор:
 * Зубков Алексей - AlexiyD (разработчик)
