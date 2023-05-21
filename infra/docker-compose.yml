@@ -21,7 +21,6 @@ services:
 
   backend:
     image: alexiyd/infra-backend:latest
-    
     restart: always
     volumes:
       - static_value:/app/static/

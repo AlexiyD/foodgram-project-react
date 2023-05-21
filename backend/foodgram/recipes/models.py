@@ -1,8 +1,6 @@
-import re
-
-from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
+from .validators import validate_name, validate_color
 from django.db import models
 from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
                               ImageField, ManyToManyField,
@@ -11,13 +9,6 @@ from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
 
 
 class Tag(models.Model):
-    @staticmethod
-    def validate_name(self, name):
-        if not re.match(r'^[\w\s-]+$', name):
-            raise ValidationError(
-                'Тэг содержит недопустимые символы.'
-            )
-
     name = CharField(
         verbose_name='Тэг',
         max_length=200,
@@ -25,12 +16,6 @@ class Tag(models.Model):
         validators=[validate_name]
     )
 
-    @staticmethod
-    def validate_color(self, color):
-        if not re.match(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', color):
-            raise ValidationError(
-                'Цвет должен быть в формате HEX (#XXXXXX или #XXX).'
-            )
     color = CharField(
         verbose_name='Цвет',
         max_length=7,
@@ -38,8 +23,9 @@ class Tag(models.Model):
         db_index=False,
         validators=[validate_color]
     )
+
     slug = SlugField(
-        verbose_name='Слаг tag',
+        verbose_name='Слаг тэга',
         max_length=200,
         unique=True,
     )

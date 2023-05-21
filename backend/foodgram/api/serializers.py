@@ -170,7 +170,7 @@ class RecipeListSerializer(ModelSerializer):
     tags = TagSerializer(many=True) 
     author = BaseUserSerializer() 
     ingredients = IngredientRecipeListSerializer(many=True, 
-                                                 source='amount_ingredient') 
+                                                 source='ingredient_recipe') 
     is_favorited = SerializerMethodField() 
     is_in_shopping_cart = SerializerMethodField() 
  
