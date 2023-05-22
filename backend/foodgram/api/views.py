@@ -68,7 +68,10 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(methods=['POST', 'DELETE'], detail=True, permission_classes=[IsAuthenticated])
+    @action(methods=['POST', 'DELETE'],
+            detail=True,
+            permission_classes=[IsAuthenticated]
+            )
     def subscribe(self, request, id):
         user = self.request.user
         author = get_object_or_404(User, id=id)
@@ -77,8 +80,12 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
             if subscription.exists():
                 raise ValidationError("You cannot subscribe to yourself.")
             Subscription.objects.create(user=user, author=author)
-            serializer = SubscriptionSerializer(author, context={'request': request})
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            serializer = SubscriptionSerializer(author,
+                                                context={'request': request}
+                                                )
+            return Response(data=serializer.data,
+                            status=status.HTTP_201_CREATED
+                            )
 
         if request.method == 'DELETE':
             if not subscription.exists():
