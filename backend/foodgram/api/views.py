@@ -68,44 +68,23 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(methods=['POST', 'DELETE'],
-            detail=True,
-            permission_classes=[IsAuthenticated]
-            )
+    @action(methods=['POST', 'DELETE'], detail=True, permission_classes=[IsAuthenticated])
     def subscribe(self, request, id):
         user = self.request.user
         author = get_object_or_404(User, id=id)
-        subscription = Subscription.objects.filter(
-            user=user,
-            author=author
-        )
-
+        subscription = Subscription.objects.filter(user=user, author=author)
         if request.method == 'POST':
             if subscription.exists():
-                data = {'data': 'You cannot subscribe to yourself.'}
-                return Response(
-                    data=data,
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
+                raise ValidationError("You cannot subscribe to yourself.")
             Subscription.objects.create(user=user, author=author)
-            serializer = SubscriptionSerializer(
-                author,
-                context={'request': request}
-            )
-            return Response(
-                data=serializer.data,
-                status=status.HTTP_201_CREATED
-            )
+            serializer = SubscriptionSerializer(author, context={'request': request})
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
             if not subscription.exists():
-                data = {'data': 'You are not subscribed to this user.'}
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-
+                raise ValidationError("You are not subscribed to this user.")
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return None
 
 
 class TagViewSet(ListRetrieveViewSet):

@@ -226,13 +226,9 @@ class RecipeCreateSerializer(ModelSerializer):
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        try:
-            recipe = Recipe.objects.create(**validated_data)
-            recipe.tags.set(tags)
-            self._add_ingredients(recipe, ingredients_data)
-        except Exception as e:
-            recipe.delete()
-            raise e
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        self._add_ingredients(recipe, ingredients_data)
         return recipe
 
     @transaction.atomic
