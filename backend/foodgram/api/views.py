@@ -86,13 +86,12 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
             return Response(data=serializer.data,
                             status=status.HTTP_201_CREATED
                             )
-
         if request.method == 'DELETE':
             if not subscription.exists():
                 raise ValidationError("You are not subscribed to this user.")
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
+        return Response(status=status.HTTP_200_OK)
 
 class TagViewSet(ListRetrieveViewSet):
     queryset = Tag.objects.all()
