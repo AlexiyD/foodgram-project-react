@@ -73,9 +73,9 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
         return self.get_paginated_response(serializer.data)
 
     @action(methods=['POST', 'DELETE'],
-        detail=True,
-        permission_classes=[IsAuthenticated]
-        )
+            detail=True,
+            permission_classes=[IsAuthenticated]
+            )
     def subscribe(self, request, id):
         user = self.request.user
         author = get_object_or_404(User, id=id)
@@ -182,7 +182,11 @@ class RecipeViewSet(ModelViewSet):
         ] = 'attachment; filename="shopping_list.pdf"'
         return response
 
-    def _add_or_remove_recipe_from_list(self, request, pk, serializer_class, list_model):
+    def _add_or_remove_recipe_from_list(self,
+                                        request,
+                                        pk,
+                                        serializer_class,
+                                        list_model):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
         in_list = list_model.objects.filter(user=user, recipe=recipe)
@@ -193,7 +197,6 @@ class RecipeViewSet(ModelViewSet):
             list_objects = list_model.objects.create(user=user, recipe=recipe)
             serializer = serializer_class(list_objects.recipe)
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
         validate_recipe_not_in_list(in_list)
         in_list.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
