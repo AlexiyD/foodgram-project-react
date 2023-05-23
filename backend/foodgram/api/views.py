@@ -196,7 +196,8 @@ class RecipeViewSet(ModelViewSet):
             validate_recipe_in_list(in_list)
             list_objects = list_model.objects.create(user=user, recipe=recipe)
             serializer = serializer_class(list_objects.recipe)
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response(data=serializer.data,
+                            status=status.HTTP_201_CREATED)
         validate_recipe_not_in_list(in_list)
         in_list.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
