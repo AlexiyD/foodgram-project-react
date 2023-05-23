@@ -166,40 +166,43 @@ class FavoriteSerializer(ModelSerializer):
         )
 
 
-class RecipeListSerializer(ModelSerializer):
-    tags = TagSerializer(many=True)
-    author = BaseUserSerializer()
-    ingredients = IngredientRecipeListSerializer(many=True,
-                                                 source='ingredient_recipe')
-    is_favorited = SerializerMethodField()
-    is_in_shopping_cart = SerializerMethodField()
+class RecipeListSerializer(ModelSerializer): 
+    tags = TagSerializer(many=True) 
+    author = BaseUserSerializer() 
+    ingredients = IngredientRecipeListSerializer(
+        many=True,
+        source='ingredient_recipe'
+    )
+    is_favorited = SerializerMethodField() 
+    is_in_shopping_cart = SerializerMethodField() 
 
-    def get_is_favorited(self, obj):
-        user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return Favorite.objects.filter(user=user, recipe=obj).exists()
+    def get_is_favorited(self, obj): 
+        user = self.context['request'].user 
+        return not user.is_anonymous and Favorite.objects.filter(
+            user=user,
+            recipe=obj
+        ).exists()
 
-    def get_is_in_shopping_cart(self, obj):
-        user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return Recipe.objects.filter(shopping_cart__user=user,
-                                     id=obj.id).exists()
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'tags',
-            'author',
-            'ingredients',
-            'is_favorited',
-            'is_in_shopping_cart',
-            'name',
-            'image',
-            'text',
-            'cooking_time',
+    def get_is_in_shopping_cart(self, obj): 
+        user = self.context['request'].user 
+        return not user.is_anonymous and Recipe.objects.filter(
+            shopping_cart__user=user,
+            id=obj.id
+        ).exists()
+ 
+    class Meta: 
+        model = Recipe 
+        fields = ( 
+            'id', 
+            'tags', 
+            'author', 
+            'ingredients', 
+            'is_favorited', 
+            'is_in_shopping_cart', 
+            'name', 
+            'image', 
+            'text', 
+            'cooking_time', 
         )
 
 

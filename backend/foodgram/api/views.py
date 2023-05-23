@@ -16,6 +16,11 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.validators import ValidationError
 from users.models import Subscription, User
+from .validators import (validate_subscribe,
+                         validate_unsubscribe,
+                         validate_recipe_in_list,
+                         validate_recipe_not_in_list
+                         )
 
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorAdminOrReadOnly
@@ -68,30 +73,31 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(methods=['POST', 'DELETE'],
-            detail=True,
-            permission_classes=[IsAuthenticated]
-            )
-    def subscribe(self, request, id):
-        user = self.request.user
-        author = get_object_or_404(User, id=id)
-        subscription = Subscription.objects.filter(user=user, author=author)
-        if request.method == 'POST':
-            if subscription.exists():
-                raise ValidationError("You cannot subscribe to yourself.")
-            Subscription.objects.create(user=user, author=author)
-            serializer = SubscriptionSerializer(author,
-                                                context={'request': request}
-                                                )
-            return Response(data=serializer.data,
-                            status=status.HTTP_201_CREATED
-                            )
-        if request.method == 'DELETE':
-            if not subscription.exists():
-                raise ValidationError("You are not subscribed to this user.")
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_200_OK)
+    @action(methods=['POST', 'DELETE'], 
+        detail=True, 
+        permission_classes=[IsAuthenticated] 
+        ) 
+    def subscribe(self, request, id): 
+        user = self.request.user 
+        author = get_object_or_404(User, id=id) 
+        subscription = Subscription.objects.filter(user=user, author=author) 
+        method = request.method
+
+        if method == 'POST': 
+            validate_subscribe(user, author)
+            Subscription.objects.create(user=user, author=author) 
+            serializer = SubscriptionSerializer(author, 
+                                                context={'request': request} 
+                                                ) 
+            return Response(data=serializer.data, 
+                            status=status.HTTP_201_CREATED 
+                            ) 
+        elif method == 'DELETE': 
+            validate_unsubscribe(subscription)
+            subscription.delete() 
+            return Response(status=status.HTTP_204_NO_CONTENT) 
+        else:
+            return Response(status=status.HTTP_200_OK)
 
 
 class TagViewSet(ListRetrieveViewSet):
@@ -184,26 +190,27 @@ class RecipeViewSet(ModelViewSet):
                                         list_model):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        in_list = list_model.objects.filter(user=user,
-                                            recipe=recipe
-                                            )
-        if request.method == 'POST':
-            if not in_list:
-                list_objects = list_model.objects.create(
-                    user=user,
-                    recipe=recipe
+        in_list = list_model.objects.filter(
+            user=user,
+            recipe=recipe
+            )
+        method = request.method
+        if method == 'POST':
+            validate_recipe_in_list(in_list)
+            list_objects = list_model.objects.create(
+                user=user,
+                recipe=recipe
                 )
-                serializer = serializer_class(
-                    list_objects.recipe
+            serializer = serializer_class(list_objects.recipe)
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_201_CREATED
                 )
-                return Response(
-                    data=serializer.data,
-                    status=status.HTTP_201_CREATED
-                )
-            raise ValidationError('Рецепт уже находится в списке покупок')
-        if request.method == 'DELETE':
-            if not in_list:
-                raise ValidationError('Рецепта нет в списке')
+
+        elif method == 'DELETE':
+            validate_recipe_not_in_list(in_list)
             in_list.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response(status=status.HTTP_200_OK)
