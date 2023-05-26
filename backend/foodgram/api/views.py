@@ -183,8 +183,8 @@ class RecipeViewSet(ModelViewSet):
 
         serializer = serializer_class(data={'user': user.id,
                                             'recipe': recipe.id},
-                                            context={'request': request}
-                                            )
+                                      context={'request': request}
+                                     )
         serializer.is_valid(raise_exception=True)
 
         if request.method == 'POST':
@@ -230,4 +230,3 @@ class RecipeViewSet(ModelViewSet):
                 return True
 
         return False
-    

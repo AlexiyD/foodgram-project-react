@@ -207,7 +207,7 @@ class RecipeListSerializer(ModelSerializer):
             return False
         return Recipe.objects.filter(shopping_cart__user=user,
                                      id=obj.id).exists()
-    
+
     def validate(self, attrs):
         request = self.context['request']
         user = request.user
