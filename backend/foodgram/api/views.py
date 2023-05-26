@@ -12,7 +12,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.validators import ValidationError
 from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
@@ -71,26 +70,24 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
             permission_classes=[IsAuthenticated]
             )
     def subscribe(self, request, id):
-        user = self.request.user
+        user = request.user
         author = get_object_or_404(User, id=id)
-        subscription = Subscription.objects.filter(user=user, author=author)
 
         if request.method == 'POST':
-            if subscription.exists():
-                raise ValidationError('You cannot subscribe to yourself.')
-            Subscription.objects.create(user=user, author=author)
-            serializer = SubscriptionSerializer(author,
-                                                context={'request': request}
-                                                )
-            return Response(data=serializer.data,
-                            status=status.HTTP_201_CREATED
-                            )
+            serializer = SubscriptionSerializer(
+                data={'author': author.id},
+                context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            if not subscription.exists():
-                raise ValidationError('You are not subscribed to this user.')
+            subscription = get_object_or_404(Subscription, user=user, author=author)
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class TagViewSet(ListRetrieveViewSet):
@@ -170,32 +167,21 @@ class RecipeViewSet(ModelViewSet):
 
         return response
 
-    def _add_or_remove_recipe_from_list(self,
-                                        request,
-                                        pk,
-                                        serializer_class,
-                                        list_model):
+    def _add_or_remove_recipe_from_list(self, request, pk, serializer_class, recipe_model):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        in_list = list_model.objects.filter(user=user, recipe=recipe)
+
+        serializer = serializer_class(data={'user': user.id, 'recipe': recipe.id}, context={'request': request})
+        serializer.is_valid(raise_exception=True)
 
         if request.method == 'POST':
-            if not in_list:
-                list_objects = list_model.objects.create(user=user,
-                                                         recipe=recipe
-                                                         )
-                serializer = serializer_class(list_objects)
-                return Response(data=serializer.data,
-                                status=status.HTTP_201_CREATED
-                                )
-
-            raise ValidationError('Рецепт уже находится в списке покупок')
+            recipe_objects = recipe_model.objects.create(user=user, recipe=recipe)
+            serializer = serializer_class(recipe_objects)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            if not in_list:
-                raise ValidationError('Рецепта нет в списке')
-
-            in_list.delete()
+            in_recipet = recipe_model.objects.filter(user=user, recipe=recipe)
+            in_recipet.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @transaction.atomic
@@ -203,18 +189,13 @@ class RecipeViewSet(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        if self._recipe_already_exists(serializer.validated_data):
-            raise ValidationError(
-                'Рецепт с такими ингредиентами уже существует.'
-            )
-
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED,
                         headers=headers
                         )
-
+    
     def _recipe_already_exists(self, validated_data):
         ingredients_data = validated_data.get('ingredients')
         if ingredients_data:
