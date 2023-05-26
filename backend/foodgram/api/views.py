@@ -80,10 +80,15 @@ class SubscriptionPasswordUserViewSet(UserViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save(user=user)
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response(data=serializer.data,
+                            status=status.HTTP_201_CREATED
+                            )
 
         if request.method == 'DELETE':
-            subscription = get_object_or_404(Subscription, user=user, author=author)
+            subscription = get_object_or_404(Subscription,
+                                             user=user,
+                                             author=author
+                                             )
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -167,17 +172,29 @@ class RecipeViewSet(ModelViewSet):
 
         return response
 
-    def _add_or_remove_recipe_from_list(self, request, pk, serializer_class, recipe_model):
+    def _add_or_remove_recipe_from_list(self,
+                                        request,
+                                        pk,
+                                        serializer_class,
+                                        recipe_model
+                                        ):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
 
-        serializer = serializer_class(data={'user': user.id, 'recipe': recipe.id}, context={'request': request})
+        serializer = serializer_class(data={'user': user.id,
+                                            'recipe': recipe.id},
+                                            context={'request': request}
+                                            )
         serializer.is_valid(raise_exception=True)
 
         if request.method == 'POST':
-            recipe_objects = recipe_model.objects.create(user=user, recipe=recipe)
+            recipe_objects = recipe_model.objects.create(user=user,
+                                                         recipe=recipe
+                                                         )
             serializer = serializer_class(recipe_objects)
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response(data=serializer.data,
+                            status=status.HTTP_201_CREATED
+                            )
 
         if request.method == 'DELETE':
             in_recipet = recipe_model.objects.filter(user=user, recipe=recipe)
@@ -195,7 +212,7 @@ class RecipeViewSet(ModelViewSet):
                         status=status.HTTP_201_CREATED,
                         headers=headers
                         )
-    
+
     def _recipe_already_exists(self, validated_data):
         ingredients_data = validated_data.get('ingredients')
         if ingredients_data:
@@ -213,3 +230,4 @@ class RecipeViewSet(ModelViewSet):
                 return True
 
         return False
+    

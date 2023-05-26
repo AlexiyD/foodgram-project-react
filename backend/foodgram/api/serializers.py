@@ -90,7 +90,7 @@ class SubscriptionSerializer(ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
-    
+
     def validate(self, attrs):
         request = self.context['request']
         user = request.user
@@ -102,7 +102,10 @@ class SubscriptionSerializer(ModelSerializer):
                 raise ValidationError("You cannot subscribe to yourself.")
 
         if method == 'DELETE':
-            subscription = Subscription.objects.filter(user=user, author=author)
+            subscription = Subscription.objects.filter(
+                user=user,
+                author=author
+            )
             if not subscription.exists():
                 raise ValidationError("You are not subscribed to this user.")
 
@@ -204,6 +207,7 @@ class RecipeListSerializer(ModelSerializer):
             return False
         return Recipe.objects.filter(shopping_cart__user=user,
                                      id=obj.id).exists()
+    
     def validate(self, attrs):
         request = self.context['request']
         user = request.user
@@ -282,7 +286,10 @@ class RecipeCreateSerializer(ModelSerializer):
     def validate(self, attrs):
         ingredients_data = attrs.get('ingredients')
         if ingredients_data:
-            ingredient_ids = [ingredient.get('id') for ingredient in ingredients_data]
+            ingredient_ids = [ingredient.get('id')
+                              for ingredient
+                              in ingredients_data
+                              ]
             amount = len(ingredient_ids)
 
             existing_recipe = Recipe.objects.filter(
