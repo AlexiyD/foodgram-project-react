@@ -165,7 +165,7 @@ class RecipeViewSet(ModelViewSet):
         response = HttpResponse(content_type='text/plain')
         response[
             'Content-Disposition'
-            ] = 'attachment; filename="shopping_list.txt"'
+        ] = 'attachment; filename="shopping_list.txt"'
         response.write(shopping_list)
 
         return response
@@ -218,7 +218,7 @@ class RecipeViewSet(ModelViewSet):
     def _recipe_already_exists(self, validated_data):
         ingredients_data = validated_data.get('ingredients')
         if ingredients_data:
-            ingredient_ids = [ingredient.get('id') 
+            ingredient_ids = [ingredient.get('id')
                               for ingredient
                               in ingredients_data]
             amount = len(ingredient_ids)
