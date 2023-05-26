@@ -20,7 +20,6 @@ services:
       - foodgram_network
 
   backend:
-    #build: ../backend/
     image: alexiyd/infra-backend:latest
     restart: always
     volumes:
