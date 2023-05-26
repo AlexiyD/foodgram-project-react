@@ -31,7 +31,10 @@ class BaseUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
-        return not user.is_anonymous and Subscription.objects.filter(user=user, author=obj).exists()
+        return not user.is_anonymous and Subscription.objects.filter(
+            user=user,
+            author=obj
+        ).exists()
 
     class Meta:
         model = User
@@ -128,7 +131,7 @@ class IngredientRecipeCreateSerializer(ModelSerializer):
         model = Ingredient
         fields = (
             'id',
-             'amount',
+            'amount',
         )
 
 
@@ -160,17 +163,6 @@ class FavoriteSerializer(ModelSerializer):
     class Meta:
         model = Favorite
         fields = ('id', 'user', 'recipe')
-
-
-class TagSerializer(ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = (
-            'id',
-            'name',
-            'color',
-            'slug',
-        )
 
 
 class RecipeListSerializer(ModelSerializer):
@@ -228,7 +220,6 @@ class RecipeCreateSerializer(ModelSerializer):
     def get_ingredients(self, obj):
         ingredients = obj.ingredient_recipes.all()
         return IngredientRecipeListSerializer(ingredients).data
-
 
     @transaction.atomic
     def create(self, validated_data):

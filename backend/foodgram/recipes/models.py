@@ -6,30 +6,30 @@ from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
                               ImageField, ManyToManyField,
                               PositiveSmallIntegerField, SlugField, TextField,
                               UniqueConstraint)
- 
- 
-class Tag(models.Model): 
-    name = CharField( 
-        verbose_name='Тэг', 
-        max_length=200, 
-        unique=True, 
-        validators=[validate_name] 
-    ) 
- 
-    color = CharField( 
-        verbose_name='Цвет', 
-        max_length=7, 
-        unique=True, 
-        db_index=False, 
-        validators=[validate_color] 
-    ) 
- 
-    slug = SlugField( 
-        verbose_name='Слаг тэга', 
-        max_length=200, 
-        unique=True, 
-    ) 
- 
+
+
+class Tag(models.Model):
+    name = CharField(
+        verbose_name='Тэг',
+        max_length=200,
+        unique=True,
+        validators=[validate_name]
+    )
+
+    color = CharField(
+        verbose_name='Цвет',
+        max_length=7,
+        unique=True,
+        db_index=False,
+        validators=[validate_color]
+    )
+
+    slug = SlugField(
+        verbose_name='Слаг тэга',
+        max_length=200,
+        unique=True,
+    )
+
     class Meta:
         ordering = ('-id',)
         verbose_name = 'Тэг'
@@ -37,8 +37,8 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
- 
- 
+
+
 class Ingredient(models.Model):
     name = CharField(
         verbose_name='Ингредиент',
